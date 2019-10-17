@@ -1,3 +1,4 @@
+# -*- coding: utf-8 -*-
 from Crypto.Cipher import AES
 from pkcs7 import PKCS7Encoder
 from requests.packages.urllib3.exceptions import InsecureRequestWarning

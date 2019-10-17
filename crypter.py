@@ -1,3 +1,12 @@
+# -*- coding: utf-8 -*-
+from Crypto.Cipher import AES
+from pkcs7 import PKCS7Encoder
+import base64
+import binascii
+import hashlib
+import hmac
+import zlib
+
 class AesCoder(object):
 	def __init__(self):		
 		self.key='/fXAsKvK0gHMbaGTQayi9Q=='

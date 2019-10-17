@@ -1,19 +1,12 @@
-from Crypto.Cipher import AES
-from pkcs7 import PKCS7Encoder
-from requests.packages.urllib3.exceptions import InsecureRequestWarning
-import base64
-import binascii
-import hashlib
-import hmac
+# -*- coding: utf-8 -*-
+from crypter import AesCoder
 import json
 import os
-import random
 import requests
-import threading
 import time
-import zlib
 
-i=0
+from requests.packages.urllib3.exceptions import InsecureRequestWarning
+requests.packages.urllib3.disable_warnings(InsecureRequestWarning)
 
 def save(d,f):
 	with open(f, 'a') as the_file:
@@ -22,7 +15,6 @@ def save(d,f):
 class KOA(object):
 	def __init__(self,guid):
 		print 'using %s as guid'%guid
-		requests.packages.urllib3.disable_warnings(InsecureRequestWarning)
 		self.url='http://dw-us.funplusgame.com/api/'
 		self.url_login='https://passport.funplusgame.com/client_api.php?ver=3'
 		self.lang="en"
@@ -251,29 +243,3 @@ class KOA(object):
 		self.commit({"city_id": self.city_id, "tutorial": "eyJjdXJyZW50UHJvY2VzcyI6eyJiZWdpbm5lciI6ImZpbmlzaGVkIiwiVHV0b3JpYWxfcXVlc3QiOiJmaW5pc2hlZCIsIlR1dG9yaWFsX21pbGl0YXJ5X3RlbnQiOiJmaW5pc2hlZCIsIlR1dG9yaWFsX21haWwiOiJmaW5pc2hlZCJ9fQ=="},"Player:setTutorial")
 		self.addObject(self.city_id,self.ctime(),39,200590)
 		print 'tutorial completed'
-	
-def createAccs():
-	rmd= binascii.hexlify(os.urandom(16))
-	api=KOA(rmd)
-	#api=KOA('b2cb9b129df941dee617e06144738dd8')
-	print api.user_info['power']
-	if api.user_info['power']== 5020:
-		api.completeTutorial()
-	api.upgradeBuildings()
-	api.upgradeBuildings()
-	api.upgradeBuildings()
-	api.checkMail()
-	api.useConsumableItem("koabot.com %s"%(binascii.hexlify(os.urandom(3))[:-1]))
-	api.refreshTokens()
-	s='fpid:%s power:%s name:"%s" uid:%s x:%s y:%s'%(api.user_info['fpid'],api.user_info['power'],api.user_info['name'],api.user_city['uid'],api.user_city['map_x'],api.user_city['map_y'])
-	save(s,str(api.user_info['fpid'])+'.json')
-	global i
-	i-=1
-	
-while(1):
-	while(i>=15):
-		print '15 jobs--'
-		time.sleep(30)
-	t = threading.Thread(target=createAccs, args=())
-	t.start()
-	i+=1
