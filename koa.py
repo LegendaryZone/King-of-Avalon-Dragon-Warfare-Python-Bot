@@ -3,30 +3,27 @@ from crypter import AesCoder
 import json
 import os
 import requests
+import random
 import time
 
 from requests.packages.urllib3.exceptions import InsecureRequestWarning
 requests.packages.urllib3.disable_warnings(InsecureRequestWarning)
 
-def save(d,f):
-	with open(f, 'a') as the_file:
-		the_file.write('{}\n'.format(d))
-
 class KOA(object):
 	def __init__(self,guid):
 		print 'using %s as guid'%guid
-		self.url='http://dw-us.funplusgame.com/api/'
-		self.url_login='https://passport.funplusgame.com/client_api.php?ver=3'
+		self.url='http://koa-global.kingsgroupgames.com/api//'
+		self.url_login='https://koa-passport.kingsgroupgames.com/client_api.php'
 		self.lang="en"
-		self.idfv=""
+		self.idfv=self.rndDeviceId()
 		self.social_id=""
 		self.kingdom_id=0
 		self.fpid=None
-		self.device_lang=""
+		self.device_lang="en-GB"
 		self.time_zone=""
 		self.os_version="0.0.00"
 		self.sys_lang="en-GB"
-		self.idfa=""
+		self.idfa="00000000-0000-0000-0000-000000000000"
 		self.device="IPhonePlayer"
 		self.app_version="0.0.0"
 		self.session_key=None
@@ -40,26 +37,33 @@ class KOA(object):
 		self.gaid=""
 		self.seq=0
 		self.race_mode=0
-		self.cv="1486449937"
-		self.bvr="2.3.1.185.R"
-		self.bvg="2.3.1.185.R"
-		self.client_version="2.3.1"
+		self.cv="1571230905"
+		self.bvr="6.9.2.912.R"
+		self.bvg="6.9.2.912.G"
+		self.client_version="6.9.2"
 		self.guid=guid
 		self.user_info=None
 		self.city_map=None
 		self.already_init=False
 		self.s=requests.session()
 		self.s.verify=False
-		self.s.headers.update({'X-Unity-Version':'5.2.2f1','Pragma':'no-cache','GDataVer':'v1','Expires':'0','User-Agent':'kingofavalon/178 CFNetwork/808.2.16 Darwin/16.3.0','Accept-Encoding':'gzip','Accept-Language':'en-gb','Content-Type':'application/octet-stream'})
+		self.s.headers.update({'X-Unity-Version':'5.5.6f1','Pragma':'no-cache','GDataVer':'v1','Accept':'*/*','Expires':'0','Accept-Encoding':'gzip','Accept-Language':'en-gb','Cache-Control':'no-cache','Content-Type':'application/octet-stream','User-Agent':'kingofavalon/912 CFNetwork/808.2.16 Darwin/16.3.0'})
 		self.crypter=AesCoder()
 		self.express_signin()
-		
+
+	def rndHex(self,n):
+		return ''.join([random.choice('0123456789ABCDEF') for x in range(n)])
+	
+	def rndDeviceId(self):
+		s='%s-%s-%s-%s-%s'%(self.rndHex(8),self.rndHex(4),self.rndHex(4),self.rndHex(4),self.rndHex(12))
+		return s
+
 	def express_signin(self):
-		d='idfa=00000000-0000-0000-0000-000000000000&l=en-GB&method=express_signin&game_id=2031&guid=%s&funplus_sdk_version=3.0.38'%(self.guid)
+		d='app_version=6.9.2.912&method=login&l=en-GB&game_id=2031&guid=%s&sdk_version=3.2.75&idfa=00000000-0000-0000-0000-000000000000'%(self.guid)
 		auth=self.crypter.MakeSigV3(d)
 		data= json.loads(self.s.post(self.url_login,data=d,headers={'Content-Type':'application/x-www-form-urlencoded','User-Agent':'kingofavalon/178 CFNetwork/808.2.16 Darwin/16.3.0','Connection':'keep-alive','Accept-Language':'en-gb','Authorization':auth,'Accept-Encoding':'gzip, deflate'}).content)
 		self.fpid=data['data']['fpid']
-		self.session_key=data['data']['session_key']
+		self.session_key=data['data']['auth_token']
 		self.init()
 	
 	def buildPOST(self,method,class_,params,commit=False):
@@ -79,7 +83,7 @@ class KOA(object):
 		return json.loads(self.crypter.Decode(r.content,True))
 
 	def init(self):
-		data= self.buildPOST(method='init',class_='call',params={"lang":self.lang,"idfv":self.idfv,"social_id":self.social_id,"kingdom_id":self.kingdom_id,"session_key":self.session_key,"fpid":self.fpid,"device_lang":self.device_lang,"time_zone":self.time_zone,"os_version":self.os_version,"sys_lang":self.sys_lang,"idfa":self.idfa,"device":self.device,"app_version":self.app_version,"os":self.os,"android_id":self.android_id,"gaid":self.gaid})
+		data= self.buildPOST(method='init',class_='call',params={"device_lang":self.device_lang,"os":self.os,"cv":self.cv,"fpid":self.fpid,"social_id":"","client_version":self.client_version,"idfa":self.idfa,"time_zone":"+03:00","os_version":self.os_version,"session_key":self.session_key,"idfv":self.idfv,"gaid":"","app_version":"0.0.0","currency_code":"EUR","lang":"en","kingdom_id":0,"sys_lang":"en-GB"})
 		self.city_id=data['data']['user_city'][0]['city_id']
 		self.user_city=data['data']['user_city'][0]
 		self.user_info=data['data']['user_info'][0]

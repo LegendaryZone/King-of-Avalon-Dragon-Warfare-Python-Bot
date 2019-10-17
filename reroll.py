@@ -3,6 +3,10 @@ import os
 import binascii
 from koa import KOA
 
+def save(d,f):
+	with open(f, 'a') as the_file:
+		the_file.write('{}\n'.format(d))
+
 def createAccs():
 	rnd= binascii.hexlify(os.urandom(16))
 	api=KOA(rnd)

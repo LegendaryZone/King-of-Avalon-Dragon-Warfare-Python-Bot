@@ -2,7 +2,6 @@
 from Crypto.Cipher import AES
 from pkcs7 import PKCS7Encoder
 import base64
-import binascii
 import hashlib
 import hmac
 import zlib
